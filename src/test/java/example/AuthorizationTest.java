@@ -14,6 +14,7 @@ import org.apache.http.util.EntityUtils;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -47,7 +48,7 @@ class AuthorizationTest {
     void testPassword() throws IOException {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.RESPONSE_TYPE,"password"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"password"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.USERNAME,"user1"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.PASSWORD,"password"));
         httpPost.setEntity(new UrlEncodedFormEntity(params));
@@ -60,7 +61,7 @@ class AuthorizationTest {
     void testClient() throws IOException {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.RESPONSE_TYPE,"client_credentials"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"client_credentials"));
         httpPost.setEntity(new UrlEncodedFormEntity(params));
         execute(httpPost);
         //{"access_token":"eyJraWQiOiI5N2JiN2FiMC1jYTgxLTRjODgtYjFjYS01OTJiZGYyMjdiNzQiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJtZXNzYWdpbmctY2xpZW50IiwiYXVkIjoibWVzc2FnaW5nLWNsaWVudCIsIm5iZiI6MTY0NzI3MzIwNiwic2NvcGUiOlsib3BlbmlkIiwibWVzc2FnZS5yZWFkIiwibWVzc2FnZS53cml0ZSJdLCJpc3MiOiJodHRwOlwvXC9hdXRoLXNlcnZlcjo5MDAwIiwiZXhwIjoxNjQ3MjczNTA2LCJpYXQiOjE2NDcyNzMyMDZ9.O7zKZ8PiVdnfUlKmbwJoBg5LAmo6-N6L420lKp05JdSOQkhLjoRvnyggDa1qh2J6HzuD9um7-mPSCZXqOwCojqyx6mpiBP3Hdbz6uug4fdtzdWv78peW8plVtoNz8c8-8v0dxIHkvCWBdnLCPPROdclCXMUHLWSXusW7B2bR6CFp_MXRMoxUP7MuGbgElytmhpxkqx4Vfc0NOJgf8E3-PwBwHb6-heMeRFekdvSUmMZgFHgTcxSv95grlw-Gf4qAKYOCQP4ao2UA_YyfEGMS5CgdQmMjIpdHpgO9U2lfmLRunHqnnro6zpX6TO1I4JbJnOVy-0pig6vC1uMyb_gzNw","scope":"openid message.read message.write","token_type":"Bearer","expires_in":299}
@@ -85,12 +86,25 @@ class AuthorizationTest {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
         params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"authorization_code"));
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"GTK_ltZuH5KqWhLZtUvrA9ismRZ3wCHyQCE5Uxk9-3MMXc_r4y97g2-UEZa7bnwSTj-e40z9SdVmULZfdofKeQoUfOgY67JtSayaUaPzCutHDmG2vr7feiDIMHC8EWUV"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"gFLNFBKK1mPlv5vyo_IOHlcidCfKU3Vkr_-Pm7pgj7Sa9qSjhp3oFFwvpu0CNiEwGl7S65D1AxIaYpkp75mqmr390M2OyC6aUCAHGaUVSuRhpFqvRRGOOIWaUlsjPqOf"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.STATE,"some-state"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.REDIRECT_URI,"http://www.baidu.com"));
         httpPost.setEntity(new UrlEncodedFormEntity(params));
         execute(httpPost);
 
         //{"access_token":"eyJraWQiOiJmMmNkOGRiNC00ZGQwLTQ5NGEtOWFjNi00MTk4YjhjZDYyOGMiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyMSIsImF1ZCI6Im1lc3NhZ2luZy1jbGllbnQiLCJuYmYiOjE2NDc0NDE3OTEsInNjb3BlIjpbIm1lc3NhZ2Uud3JpdGUiXSwiaXNzIjoiaHR0cDpcL1wvYXV0aC1zZXJ2ZXI6OTAwMCIsImV4cCI6MTY0NzQ0MjA5MSwiaWF0IjoxNjQ3NDQxNzkxfQ.qXJj5YsoOsUYNTqvgtb02BW9S2r_GAzB2ckEMuLKpCsQ18p5dkgVO_AFRd4PbKjJ0ACcuu6-bTyp4fmED6NMqhVjv8it7roqa5A0iGkFT5Le9E8uwvZRAfDMbYdH9GbvOq4OxJXmrHKBCvBRssV5kgG4t41EXvejspk5prVCXQZUVWZEpfMWDcKW8un7GsY0EqbwV74FZ800gGa_WbSO0K5p8G90BGzTad21mpCpnT-1TC01CQdWik2ig9joeANgojify5tAJeHPH7SejyiNJnjUbkLobgqcmb-ZvjxkVsB5ZQcJp7hiC6GxOD7b3E5sL8tRezeD88nZzPknBfxvBA","refresh_token":"leiALygiLS6maf0aCOxwyp77BxqZw3kGy8XvRCzX-9alDhldpI0f8nzza1wWSBtK6jMYfb2YDv-bPBdbi9r9wbXeqtPoguoxqXLwqk-4x6H_v_9me17yWcyUnrwf6WhB","scope":"message.write","token_type":"Bearer","expires_in":300}
+    }
+
+
+    @Test
+    @DisplayName("刷新令牌")
+    void testRefresh() throws IOException {
+        HttpPost httpPost = createHttpPost();
+        List<NameValuePair> params = Lists.newArrayList();
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE, AuthorizationGrantType.REFRESH_TOKEN.getValue()));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.REFRESH_TOKEN,"4wTJmTd6N2N2ga09JhX1zPf8eEZNN9x_iOgBWr7ndYRiuLCn8IHQJDdEdiQG2xV7yjxyby0HZ3lvIM6uZ6rPo3TkzH-L4BNykO8QLinR9HgctqVpQS1i8mwnPJRIKCvH"));
+        httpPost.setEntity(new UrlEncodedFormEntity(params));
+        execute(httpPost);
+        //重新生成access_token令牌，refresh_token的值不变
     }
 }
