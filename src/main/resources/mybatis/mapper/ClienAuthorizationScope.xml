@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="example.dao.ClientAuthorizationScopeDao" >
+    <resultMap id="ClientAuthorizationScopeResultMap" type="ClientAuthorizationScope" >
+        <id column="id" property="id"/>
+        <result column="client_id" property="clientId" />
+        <result column="method" property="method" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        client_id, scope
+    </sql>
+    <sql id="table">client_authentication_scope</sql>
+    
+
+    <select id="getByClientId" resultMap="ClientAuthorizationScopeResultMap" parameterType="java.lang.String" >
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where client_id = #{clientId}
+    </select>
+    <insert id="insert" parameterType="ClientAuthorizationScope" useGeneratedKeys="true" keyProperty="id">
+    	insert into  <include refid="table"/>
+    	(<include refid="Base_Column_List" />)
+    	values(#{clientId},#{method})
+    </insert>
+    <update id="update" parameterType="ClientAuthorizationScope">
+    	update <include refid="table"/>
+    	set name = #{name},
+    	value = #{value}
+    	where id = #{id}
+    </update>
+   
+    <delete id="delete" parameterType="java.lang.Long">
+    	delete from <include refid="table"/>
+    	where id = #{id}
+    </delete>  
+</mapper>

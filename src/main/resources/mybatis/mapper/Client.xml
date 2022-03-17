@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="example.dao.ClientDao" >
+    <resultMap id="ClientResultMap" type="Client" >
+        <id column="id" property="id"/>
+        <result column="client_id" property="clientId" />
+        <result column="client_id_issued_at" property="clientIdIssuedAt" />
+        <result column="client_secret" property="clientSecret" />
+        <result column="client_secret_expires_at" property="clientSecretExpiresAt" />
+        <result column="client_name" property="clientName" />
+        <result column="client_icon" property="clientIcon" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        client_id, client_id_issued_at,client_secret,client_secret_expires_at,client_name, client_icon
+    </sql>
+    <sql id="table">client</sql>
+    
+    <select id="selectByPrimaryKey" resultMap="ClientResultMap" parameterType="java.lang.String" >
+        SELECT id,
+        <include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where id = #{id}
+    </select>
+    <select id="getByClientId" resultMap="ClientResultMap" parameterType="java.lang.String" >
+        SELECT id,
+        <include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where client_id = #{clientId}
+        limit 1
+    </select>
+    <insert id="insert" parameterType="Client" useGeneratedKeys="false" keyProperty="id">
+    	insert into  <include refid="table"/>
+    	(id,<include refid="Base_Column_List" />)
+    	values(#{id},#{clientId},#{clientIdIssuedAt},#{clientSecret},#{clientSecretExpiresAt},
+    	#{clientName},#{clientIcon})
+    </insert>
+    <update id="changeSecret" parameterType="java.util.Map">
+    	update <include refid="table"/>
+    	set client_secret = #{clientSecret}
+    	where id = #{id}
+    </update>
+    <update id="changeStatus" parameterType="java.util.Map">
+    	update <include refid="table"/>
+    	set status = #{status}
+    	where id = #{id}
+    </update>
+    <select id="findPageable"  resultMap="ClientResultMap">
+    	SELECT id,
+        <include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where 1=1
+		<include refid="findCriteria"/>
+        LIMIT #{pageable.offset},#{pageable.size}
+    </select>
+    <sql id="findCriteria">
+    	<if test="clientId!=null and clientId !=''">
+    		and client_id = #{clientId}
+    	</if>    	
+    	<if test="clientName!=null and clientName !=''">
+    		AND client_name like CONCAT('%',#{name},'%')
+    	</if>    	
+    </sql>    
+    <select id="findPageableCount"  resultType="java.lang.Integer">
+    	SELECT
+        COUNT(*)
+        FROM <include refid="table"/>
+        where 1=1
+       	<include refid="findCriteria"/>
+    </select>       
+</mapper>

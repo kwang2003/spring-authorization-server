@@ -70,8 +70,6 @@ class AuthorizationTest {
     @Test
     @DisplayName("授权码模式")
     void testCode() throws IOException {
-
-
         String redirectUrl = "http://www.baidu.com";
         String url = ENDPOINT+ UriComponentsBuilder
                 .fromPath("/oauth2/authorize")
@@ -86,7 +84,7 @@ class AuthorizationTest {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
         params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"authorization_code"));
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"gFLNFBKK1mPlv5vyo_IOHlcidCfKU3Vkr_-Pm7pgj7Sa9qSjhp3oFFwvpu0CNiEwGl7S65D1AxIaYpkp75mqmr390M2OyC6aUCAHGaUVSuRhpFqvRRGOOIWaUlsjPqOf"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"1Ge1q4SFfJChGOymb5HYF5Ot5PQVuDMQdnexhV3FaJLd6CO9kE-d7gdGyXK010gHconvg1m75i83tCLr41NcHaXBXODEomga6ABThJMzDvl-hbm13HtK-E5lBEKUycwj"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.STATE,"some-state"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.REDIRECT_URI,"http://www.baidu.com"));
         httpPost.setEntity(new UrlEncodedFormEntity(params));
@@ -102,7 +100,7 @@ class AuthorizationTest {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
         params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE, AuthorizationGrantType.REFRESH_TOKEN.getValue()));
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.REFRESH_TOKEN,"4wTJmTd6N2N2ga09JhX1zPf8eEZNN9x_iOgBWr7ndYRiuLCn8IHQJDdEdiQG2xV7yjxyby0HZ3lvIM6uZ6rPo3TkzH-L4BNykO8QLinR9HgctqVpQS1i8mwnPJRIKCvH"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.REFRESH_TOKEN,"69t9Ebwp7araMoTXChxtS5OD6jG5FPAwm2Opx0TA3ruSYEJp5fThcS7l0J2-8PwfQMwzXighBURHORt_aEdVpK7PFIB42DRu_D8i4KNAflAdqYJY94IvacYcnX96uNV3"));
         httpPost.setEntity(new UrlEncodedFormEntity(params));
         execute(httpPost);
         //重新生成access_token令牌，refresh_token的值不变

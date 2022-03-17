@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="example.dao.ClientAuthorizationGrantTypeDao" >
+    <resultMap id="ClientAuthorizationGrantTypeMap" type="ClientAuthorizationGrantType" >
+        <id column="id" property="id"/>
+        <result column="client_id" property="clientId" />
+        <result column="grant_type" property="grantType" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        client_id, grant_type
+    </sql>
+    <sql id="table">client_authorization_grant_type</sql>
+    
+
+    <select id="getByClientId" resultMap="ClientAuthorizationGrantTypeMap" parameterType="java.lang.String" >
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where client_id = #{clientId}
+    </select>
+    <insert id="insert" parameterType="ClientAuthorizationGrantType" useGeneratedKeys="true" keyProperty="id">
+    	insert into  <include refid="table"/>
+    	(<include refid="Base_Column_List" />)
+    	values(#{clientId},#{grantType})
+    </insert>
+    <update id="update" parameterType="ClientAuthorizationGrantType">
+    	update <include refid="table"/>
+    	set name = #{name},
+    	value = #{value}
+    	where id = #{id}
+    </update>
+   
+    <delete id="delete" parameterType="java.lang.Long">
+    	delete from <include refid="table"/>
+    	where id = #{id}
+    </delete>  
+</mapper>

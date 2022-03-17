@@ -8,10 +8,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @since 0.0.1
  */
 @SpringBootApplication
-public class DefaultAuthorizationServerApplication {
+public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(DefaultAuthorizationServerApplication.class, args);
+        SpringApplication.run(Application.class, args);
     }
 
 }
