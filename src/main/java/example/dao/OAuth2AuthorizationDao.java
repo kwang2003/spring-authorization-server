@@ -9,11 +9,11 @@ import java.util.UUID;
 
 @Repository
 public class OAuth2AuthorizationDao extends AbstractDao{
-    public void insert(OAuth2Authorization authorization) {
+    public int insert(OAuth2Authorization authorization) {
         if(Strings.isNullOrEmpty(authorization.getId())){
             authorization.setId(UUID.randomUUID().toString());
         }
-        this.getSqlSession().insert(getNamespacePrefix() + "insert", authorization);
+        return this.getSqlSession().insert(getNamespacePrefix() + "insert", authorization);
     }
     public OAuth2Authorization get(String id) {
         return this.getSqlSession().selectOne(getNamespacePrefix()+"getById", id);

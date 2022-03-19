@@ -12,8 +12,8 @@ import java.util.Map;
  */
 @Repository
 public class OAuth2AuthorizationConsentDao extends AbstractDao {
-	public void insert(OAuth2AuthorizationConsent clientSetting) {
-        this.getSqlSession().insert(getNamespacePrefix() + "insert", clientSetting);
+	public int insert(OAuth2AuthorizationConsent clientSetting) {
+        return this.getSqlSession().insert(getNamespacePrefix() + "insert", clientSetting);
     }
 	public OAuth2AuthorizationConsent get(Long id) {
 		return this.getSqlSession().selectOne(getNamespacePrefix()+"getById", id);

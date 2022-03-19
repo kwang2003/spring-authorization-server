@@ -2,7 +2,6 @@ package example.authentication;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import example.dao.OAuth2AuthorizationConsentDao;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent.Builder;
@@ -17,9 +16,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
-public class RemoteOAuth2AuthorizationConsentService implements OAuth2AuthorizationConsentService {
+public class RemoteOAuth2AuthorizationConsentServiceImpl implements OAuth2AuthorizationConsentService {
     @Resource
-    private OAuth2AuthorizationConsentDao oAuth2AuthorizationConsentDao;
+    private example.service.OAuth2AuthorizationConsentService oAuth2AuthorizationConsentService;
     @Override
     public void save(OAuth2AuthorizationConsent authorizationConsent) {
         Assert.notNull(authorizationConsent, "authorizationConsent cannot be null");
@@ -33,11 +32,11 @@ public class RemoteOAuth2AuthorizationConsentService implements OAuth2Authorizat
     }
 
     private void updateAuthorizationConsent(OAuth2AuthorizationConsent authorizationConsent) {
-        oAuth2AuthorizationConsentDao.update(convert(authorizationConsent));
+        oAuth2AuthorizationConsentService.update(convert(authorizationConsent));
     }
 
     private void insertAuthorizationConsent(OAuth2AuthorizationConsent authorizationConsent) {
-        oAuth2AuthorizationConsentDao.insert(convert(authorizationConsent));
+        oAuth2AuthorizationConsentService.insert(convert(authorizationConsent));
     }
 
     private example.entity.OAuth2AuthorizationConsent convert(OAuth2AuthorizationConsent authorizationConsent){
@@ -55,12 +54,12 @@ public class RemoteOAuth2AuthorizationConsentService implements OAuth2Authorizat
     @Override
     public void remove(OAuth2AuthorizationConsent authorizationConsent) {
         Assert.notNull(authorizationConsent, "authorizationConsent cannot be null");
-        oAuth2AuthorizationConsentDao.delete(authorizationConsent.getRegisteredClientId(),authorizationConsent.getPrincipalName());
+        oAuth2AuthorizationConsentService.delete(authorizationConsent.getRegisteredClientId(),authorizationConsent.getPrincipalName());
     }
 
     @Override
     public OAuth2AuthorizationConsent findById(String registeredClientId, String principalName) {
-        return Optional.ofNullable(oAuth2AuthorizationConsentDao.getByClientIdPrincipalName(registeredClientId,principalName)).map(s ->{
+        return Optional.ofNullable(oAuth2AuthorizationConsentService.getByClientIdPrincipalName(registeredClientId,principalName)).map(s ->{
             Builder builder = OAuth2AuthorizationConsent.withId(s.getClientId(),s.getPrincipalName());
             if(!Strings.isNullOrEmpty(s.getAuthorities())){
                 Splitter.on(",").split(s.getAuthorities()).forEach(a ->{
