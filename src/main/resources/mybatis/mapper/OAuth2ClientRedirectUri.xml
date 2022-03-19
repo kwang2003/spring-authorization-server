@@ -1,31 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="example.dao.TokenSettingDao" >
-    <resultMap id="TokenSettingResultMap" type="TokenSetting" >
+<mapper namespace="example.dao.OAuth2ClientRedirectUriDao" >
+    <resultMap id="OAuth2ClientRedirectUriResultMap" type="OAuth2ClientRedirectUri" >
         <id column="id" property="id"/>
         <result column="client_id" property="clientId" />
-        <result column="name" property="name" />
-        <result column="value" property="value" />
-        <result property="createdAt" column="created_at"/>
+        <result column="redirect_uri" property="redirectUri" />
     </resultMap>
     <sql id="Base_Column_List" >
-        client_id, name,value,created_at
+        client_id, redirect_uri
     </sql>
-    <sql id="table">token_setting</sql>
+    <sql id="table">oauth2_client_redirect_uri</sql>
     
 
-    <select id="getByClientId" resultMap="TokenSettingResultMap" parameterType="java.lang.String" >
+    <select id="getByClientId" resultMap="OAuth2ClientRedirectUriResultMap" parameterType="java.lang.String" >
         SELECT
         <include refid="Base_Column_List" />
         FROM <include refid="table"/>
         where client_id = #{clientId}
     </select>
-    <insert id="insert" parameterType="TokenSetting" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="OAuth2ClientRedirectUri" useGeneratedKeys="true" keyProperty="id">
     	insert into  <include refid="table"/>
     	(<include refid="Base_Column_List" />)
-    	values(#{clientId},#{name},#{value}, now())
+    	values(#{clientId},#{redirectUri})
     </insert>
-    <update id="update" parameterType="TokenSetting">
+    <update id="update" parameterType="OAuth2ClientRedirectUri">
     	update <include refid="table"/>
     	set name = #{name},
     	value = #{value}

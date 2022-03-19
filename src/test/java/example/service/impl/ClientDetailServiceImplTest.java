@@ -1,10 +1,9 @@
 package example.service.impl;
 
 import example.AbstractTestCase;
-import example.dto.ClientDto;
-import example.service.ClientDetailService;
+import example.dto.OAuth2ClientDto;
+import example.service.OAuth2ClientDetailService;
 import org.junit.jupiter.api.Test;
-import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
 
@@ -12,12 +11,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ClientDetailServiceImplTest extends AbstractTestCase {
     @Resource
-    private ClientDetailService clientDetailService;
+    private OAuth2ClientDetailService oAuth2ClientDetailService;
 
     @Test
     void testGetByClientId(){
         String clientId = "messaging-client";
-        ClientDto clientDto =clientDetailService.getByClientId(clientId);
+        OAuth2ClientDto clientDto = oAuth2ClientDetailService.getByClientId(clientId);
         assertNotNull(clientDto);
     }
 }

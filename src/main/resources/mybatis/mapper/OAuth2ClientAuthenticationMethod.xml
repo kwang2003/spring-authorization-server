@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="example.dao.ClientRedirectUriDao" >
-    <resultMap id="ClientRedirectUriResultMap" type="ClientRedirectUri" >
+<mapper namespace="example.dao.OAuth2ClientAuthenticationMethodDao" >
+    <resultMap id="OAuth2ClientAuthenticationMethodResultMap" type="OAuth2ClientAuthenticationMethod" >
         <id column="id" property="id"/>
         <result column="client_id" property="clientId" />
-        <result column="redirect_uri" property="redirectUri" />
+        <result column="method" property="method" />
     </resultMap>
     <sql id="Base_Column_List" >
-        client_id, redirect_uri
+        client_id, method
     </sql>
-    <sql id="table">client_redirect_uri</sql>
+    <sql id="table">oauth2_client_authentication_method</sql>
     
 
-    <select id="getByClientId" resultMap="ClientRedirectUriResultMap" parameterType="java.lang.String" >
+    <select id="getByClientId" resultMap="OAuth2ClientAuthenticationMethodResultMap" parameterType="java.lang.String" >
         SELECT
         <include refid="Base_Column_List" />
         FROM <include refid="table"/>
         where client_id = #{clientId}
     </select>
-    <insert id="insert" parameterType="ClientRedirectUri" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="OAuth2ClientAuthenticationMethod" useGeneratedKeys="true" keyProperty="id">
     	insert into  <include refid="table"/>
     	(<include refid="Base_Column_List" />)
-    	values(#{clientId},#{redirectUri})
+    	values(#{clientId},#{method})
     </insert>
-    <update id="update" parameterType="ClientRedirectUri">
+    <update id="update" parameterType="OAuth2ClientAuthenticationMethod">
     	update <include refid="table"/>
     	set name = #{name},
     	value = #{value}

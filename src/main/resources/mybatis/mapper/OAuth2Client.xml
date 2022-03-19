@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="example.dao.ClientDao" >
-    <resultMap id="ClientResultMap" type="Client" >
+<mapper namespace="example.dao.OAuth2ClientDao" >
+    <resultMap id="OAuth2ClientResultMap" type="OAuth2Client" >
         <id column="id" property="id"/>
         <result column="client_id" property="clientId" />
         <result column="client_id_issued_at" property="clientIdIssuedAt" />
@@ -13,22 +13,22 @@
     <sql id="Base_Column_List" >
         client_id, client_id_issued_at,client_secret,client_secret_expires_at,client_name, client_icon
     </sql>
-    <sql id="table">client</sql>
+    <sql id="table">oauth2_client</sql>
     
-    <select id="selectByPrimaryKey" resultMap="ClientResultMap" parameterType="java.lang.String" >
+    <select id="selectByPrimaryKey" resultMap="OAuth2ClientResultMap" parameterType="java.lang.String" >
         SELECT id,
         <include refid="Base_Column_List" />
         FROM <include refid="table"/>
         where id = #{id}
     </select>
-    <select id="getByClientId" resultMap="ClientResultMap" parameterType="java.lang.String" >
+    <select id="getByClientId" resultMap="OAuth2ClientResultMap" parameterType="java.lang.String" >
         SELECT id,
         <include refid="Base_Column_List" />
         FROM <include refid="table"/>
         where client_id = #{clientId}
         limit 1
     </select>
-    <insert id="insert" parameterType="Client" useGeneratedKeys="false" keyProperty="id">
+    <insert id="insert" parameterType="OAuth2Client" useGeneratedKeys="false" keyProperty="id">
     	insert into  <include refid="table"/>
     	(id,<include refid="Base_Column_List" />)
     	values(#{id},#{clientId},#{clientIdIssuedAt},#{clientSecret},#{clientSecretExpiresAt},
@@ -44,7 +44,7 @@
     	set status = #{status}
     	where id = #{id}
     </update>
-    <select id="findPageable"  resultMap="ClientResultMap">
+    <select id="findPageable"  resultMap="OAuth2ClientResultMap">
     	SELECT id,
         <include refid="Base_Column_List" />
         FROM <include refid="table"/>

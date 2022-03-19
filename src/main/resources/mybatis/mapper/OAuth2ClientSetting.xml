@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="example.dao.ClientSettingDao" >
-    <resultMap id="ClientSettingResultMap" type="ClientSetting" >
+<mapper namespace="example.dao.OAuth2ClientSettingDao" >
+    <resultMap id="OAuth2ClientSettingResultMap" type="OAuth2ClientSetting" >
         <id column="id" property="id"/>
         <result column="client_id" property="clientId" />
         <result column="name" property="name" />
@@ -11,21 +11,21 @@
     <sql id="Base_Column_List" >
         client_id, name,value,created_at
     </sql>
-    <sql id="table">client_setting</sql>
+    <sql id="table">oauth2_client_setting</sql>
     
 
-    <select id="getByClientId" resultMap="ClientSettingResultMap" parameterType="java.lang.String" >
+    <select id="getByClientId" resultMap="OAuth2ClientSettingResultMap" parameterType="java.lang.String" >
         SELECT
         <include refid="Base_Column_List" />
         FROM <include refid="table"/>
         where client_id = #{clientId}
     </select>
-    <insert id="insert" parameterType="ClientSetting" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="OAuth2ClientSetting" useGeneratedKeys="true" keyProperty="id">
     	insert into  <include refid="table"/>
     	(<include refid="Base_Column_List" />)
     	values(#{clientId},#{name},#{value}, now())
     </insert>
-    <update id="update" parameterType="ClientSetting">
+    <update id="update" parameterType="OAuth2ClientSetting">
     	update <include refid="table"/>
     	set name = #{name},
     	value = #{value}

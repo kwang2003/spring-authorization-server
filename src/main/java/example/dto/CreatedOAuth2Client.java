@@ -10,7 +10,7 @@ import lombok.Data;
  *
  */
 @Data
-public class CreatedClient implements Serializable {
+public class CreatedOAuth2Client implements Serializable {
 	private static final long serialVersionUID = -5899993255433504583L;
 	private String clientId;
 	private String clientSecret;

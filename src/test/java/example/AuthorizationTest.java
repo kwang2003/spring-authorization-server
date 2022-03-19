@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.core.endpoint.PkceParameterNames;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
@@ -84,13 +85,41 @@ class AuthorizationTest {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
         params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"authorization_code"));
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"1Ge1q4SFfJChGOymb5HYF5Ot5PQVuDMQdnexhV3FaJLd6CO9kE-d7gdGyXK010gHconvg1m75i83tCLr41NcHaXBXODEomga6ABThJMzDvl-hbm13HtK-E5lBEKUycwj"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"VXykrhT2aAe4_9xUOA3FgO3tSo6PYHwz0_i1HUdIgYVckC1sGRdUxkLcbbpPyLH__LNbugT0fytQh02skH4je0AtTIQzjjKmiQfhr-m_2JdlAKxi8LAcuSqgFckWAKpm"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.STATE,"some-state"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.REDIRECT_URI,"http://www.baidu.com"));
         httpPost.setEntity(new UrlEncodedFormEntity(params));
         execute(httpPost);
 
         //{"access_token":"eyJraWQiOiJmMmNkOGRiNC00ZGQwLTQ5NGEtOWFjNi00MTk4YjhjZDYyOGMiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyMSIsImF1ZCI6Im1lc3NhZ2luZy1jbGllbnQiLCJuYmYiOjE2NDc0NDE3OTEsInNjb3BlIjpbIm1lc3NhZ2Uud3JpdGUiXSwiaXNzIjoiaHR0cDpcL1wvYXV0aC1zZXJ2ZXI6OTAwMCIsImV4cCI6MTY0NzQ0MjA5MSwiaWF0IjoxNjQ3NDQxNzkxfQ.qXJj5YsoOsUYNTqvgtb02BW9S2r_GAzB2ckEMuLKpCsQ18p5dkgVO_AFRd4PbKjJ0ACcuu6-bTyp4fmED6NMqhVjv8it7roqa5A0iGkFT5Le9E8uwvZRAfDMbYdH9GbvOq4OxJXmrHKBCvBRssV5kgG4t41EXvejspk5prVCXQZUVWZEpfMWDcKW8un7GsY0EqbwV74FZ800gGa_WbSO0K5p8G90BGzTad21mpCpnT-1TC01CQdWik2ig9joeANgojify5tAJeHPH7SejyiNJnjUbkLobgqcmb-ZvjxkVsB5ZQcJp7hiC6GxOD7b3E5sL8tRezeD88nZzPknBfxvBA","refresh_token":"leiALygiLS6maf0aCOxwyp77BxqZw3kGy8XvRCzX-9alDhldpI0f8nzza1wWSBtK6jMYfb2YDv-bPBdbi9r9wbXeqtPoguoxqXLwqk-4x6H_v_9me17yWcyUnrwf6WhB","scope":"message.write","token_type":"Bearer","expires_in":300}
+    }
+
+    @Test
+    @DisplayName("授权码模式-使用PKCE")
+    void testPkce() throws IOException {
+        String redirectUrl = "http://www.baidu.com";
+        String url = ENDPOINT+ UriComponentsBuilder
+                .fromPath("/oauth2/authorize")
+                .queryParam(OAuth2ParameterNames.RESPONSE_TYPE, "code")
+                .queryParam(OAuth2ParameterNames.CLIENT_ID, "messaging-client")
+//                .queryParam("scope", "openid")
+                .queryParam(OAuth2ParameterNames.STATE, "some-state")
+                .queryParam(OAuth2ParameterNames.REDIRECT_URI, redirectUrl)
+                .queryParam(PkceParameterNames.CODE_CHALLENGE,"23lwVh3xPX1ckZmTTzvoh6zY_L4gi2rvd4s9kKF9FQE")
+                .queryParam(PkceParameterNames.CODE_CHALLENGE_METHOD,"S256")
+                .toUriString();
+        System.out.println(url);
+        //浏览器访问 http://localhost:9000/oauth2/authorize?response_type=code&client_id=messaging-client&state=some-state&scope=message.write&code_challenge_method=S256&code_challenge=23lwVh3xPX1ckZmTTzvoh6zY_L4gi2rvd4s9kKF9FQE&redirect_uri=http://www.baidu.com
+        HttpPost httpPost = createHttpPost();
+        List<NameValuePair> params = Lists.newArrayList();
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"authorization_code"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"8LhY5lGoXsM991tXLbvew5bx-jN0T_zN-IhYB-qPUCZRRiz6jpw_g2aILuonEskazxS2qowQzkZDEtH0PPrPDwUBwYKhpsTwXadm2k-PnuJMSe7GQqd5jKuh9vgofhxi"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.STATE,"some-state"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.REDIRECT_URI,"http://www.baidu.com"));
+        params.add(new BasicNameValuePair(PkceParameterNames.CODE_VERIFIER,"SWv.9QcLNnTC9i5qYN_p_T4tH0y6mlJZb71VU.FrLHvgC1UTwWTEVWb8zIjuR2OZC2i6HN3A_5qI9hzAHJ4JLIU6lZLI0pb1ugn8X1nx8sxQ21DYmpLBW5uj2Cdj~AlF"));
+        httpPost.setEntity(new UrlEncodedFormEntity(params));
+        execute(httpPost);
+        // {"access_token":"eyJraWQiOiI2N2E0YTBhZC00N2I5LTRiN2EtOTZkYy1jZTNhOGFiMjA5ODEiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyMSIsImF1ZCI6Im1lc3NhZ2luZy1jbGllbnQiLCJuYmYiOjE2NDc1ODM5ODYsInNjb3BlIjpbIm1lc3NhZ2Uud3JpdGUiXSwiaXNzIjoiaHR0cDpcL1wvYXV0aC1zZXJ2ZXI6OTAwMCIsImV4cCI6MTY0NzU4NDI4NiwiaWF0IjoxNjQ3NTgzOTg2fQ.MYycfMpkOR2gyWIGoepeL0H3U_nvLy7uFW80Nu76fztynYa9wxLw4swEqwXuidlK5YO7oyyNR5WOILyCJ9uQamlj8xvmeSOp_QxSZQzygm2-RNbBVw5EjokCZ2j8axW6gCMQNf7PePFMEkM047l5d7PvQDfzhO5ept5_HjXcjQ5zwLVDTcjYfvY9vcROwzrhwEHETOgRDB_DX5iUuA25IlIa_qWR7qI1li7ClMrf9pxldHV5KTCry2NDRxC3GVw17GA58w-Lb4F6Atgwl9Pl3hz82U45HvIYN3R-43w10jbZRjMr1K90ZDRZq1QyvFci7ehSVxAD_PtVm05v1ZoZiQ","refresh_token":"doDkhiBrVvv-0_J8q2rhwUAmqhw2tgtjAZ4LUUgqSdRaP9W4PsmjJOI6BdJ1S6A_fQqEzYtTd9c_uTX58xBvE4y1qedUoXy0oMT_Z3X7iQ6wpc7sFdyoBjqhI_odgeKX","scope":"message.write","token_type":"Bearer","expires_in":300}
     }
 
 
@@ -100,7 +129,7 @@ class AuthorizationTest {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
         params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE, AuthorizationGrantType.REFRESH_TOKEN.getValue()));
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.REFRESH_TOKEN,"69t9Ebwp7araMoTXChxtS5OD6jG5FPAwm2Opx0TA3ruSYEJp5fThcS7l0J2-8PwfQMwzXighBURHORt_aEdVpK7PFIB42DRu_D8i4KNAflAdqYJY94IvacYcnX96uNV3"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.REFRESH_TOKEN,"bt7SXMZOelDLwme8ulf7SzqEPmYNEiCr4DbIs-ad3qyfEETBohy1_ztz13rn1L4ARvaxSHbz4Gblh_Rypdlgm6FMATGlHVBPL5e39rJTfKGbOP_2N6lndOqIT9dRzsvA"));
         httpPost.setEntity(new UrlEncodedFormEntity(params));
         execute(httpPost);
         //重新生成access_token令牌，refresh_token的值不变

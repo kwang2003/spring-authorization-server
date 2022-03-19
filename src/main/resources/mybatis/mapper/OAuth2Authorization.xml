@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="example.dao.OAuth2AuthorizationDao" >
+    <resultMap id="OAuth2AuthorizationResultMap" type="OAuth2Authorization" >
+        <id column="id" property="id"/>
+        <result column="registered_client_id" property="registeredClientId" />
+        <result column="principal_name" property="principalName" />
+        <result column="authorization_grant_type" property="authorizationGrantType" />
+        <result column="attributes" property="attributes" />
+        <result column="state" property="state" />
+        <result column="authorization_code_value" property="authorizationCodeValue" />
+        <result column="authorization_code_issued_at" property="authorizationCodeIssuedAt" />
+        <result column="authorization_code_expires_at" property="authorizationCodeExpiresAt" />
+        <result column="authorization_code_metadata" property="authorizationCodeMetadata" />
+        <result column="access_token_value" property="accessTokenValue" />
+        <result column="access_token_issued_at" property="accessTokenIssuedAt" />
+        <result column="access_token_expires_at" property="accessTokenExpiresAt" />
+        <result column="access_token_metadata" property="accessTokenMetadata" />
+        <result column="access_token_type" property="accessTokenType" />
+        <result column="access_token_scopes" property="accessTokenScopes" />
+        <result column="oidc_id_token_value" property="oidcIdTokenValue" />
+        <result column="oidc_id_token_issued_at" property="oidcIdTokenIssuedAt" />
+        <result column="oidc_id_token_expires_at" property="oidcIdTokenExpiresAt" />
+        <result column="oidc_id_token_metadata" property="oidcIdTokenMetadata" />
+        <result column="refresh_token_value" property="refreshTokenValue" />
+        <result column="refresh_token_issued_at" property="refreshTokenIssuedAt" />
+        <result column="refresh_token_expires_at" property="refreshTokenExpiresAt" />
+        <result column="refresh_token_metadata" property="refreshTokenMetadata" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        registered_client_id, principal_name,authorization_grant_type,attributes,`state`,
+        authorization_code_value,authorization_code_issued_at,authorization_code_expires_at,
+        authorization_code_metadata,access_token_value,access_token_issued_at,access_token_expires_at,
+        access_token_metadata,access_token_type,access_token_scopes,oidc_id_token_value,
+        oidc_id_token_issued_at,oidc_id_token_expires_at,oidc_id_token_metadata,refresh_token_value,
+        refresh_token_issued_at,refresh_token_expires_at,refresh_token_metadata,
+        created_at,updated_at
+    </sql>
+    <sql id="table">oauth2_authorization</sql>
+
+    <select id="getById" resultMap="OAuth2AuthorizationResultMap" parameterType="java.lang.String" >
+        SELECT
+        id,<include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where id = #{id}
+    </select>
+    <select id="getByClientId" resultMap="OAuth2AuthorizationResultMap" parameterType="java.lang.String" >
+        SELECT
+        id,<include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where client_id = #{clientId}
+    </select>
+    <insert id="insert" parameterType="OAuth2Authorization" useGeneratedKeys="true" keyProperty="id">
+    	insert into  <include refid="table"/>
+    	(id,<include refid="Base_Column_List" />)
+    	values(#{id},#{registeredClientId},#{principalName},#{authorizationGrantType},#{attributes},#{state},
+    	    #{authorizationCodeValue},#{authorizationCodeIssuedAt},#{authorizationCodeExpiresAt},
+    	    #{authorizationCodeMetadata},#{accessTokenValue},#{accessTokenIssuedAt},#{accessTokenExpiresAt},
+            #{accessTokenMetadata},#{accessTokenType},#{accessTokenScopes},#{oidcIdTokenValue},
+    	    #{oidcIdTokenIssuedAt},#{oidcIdTokenExpiresAt},#{oidcIdTokenMetadata},#{refreshTokenValue},
+    	    #{refreshTokenIssuedAt},#{refreshTokenExpiresAt},#{refreshTokenMetadata},
+    	    now(),now())
+    </insert>
+    <update id="update" parameterType="OAuth2Authorization">
+    	update <include refid="table"/>
+    	set
+    	    registered_client_id = #{registeredClientId}, principal_name = #{principalName}, authorization_grant_type = #{authorizationGrantType}, attributes = #{attributes}, `state` = #{state},
+            authorization_code_value = #{authorizationCodeValue}, authorization_code_issued_at = #{authorizationCodeIssuedAt}, authorization_code_expires_at = #{authorizationCodeExpiresAt}, authorization_code_metadata = #{authorizationCodeMetadata},
+            access_token_value = #{accessTokenValue}, access_token_issued_at = #{accessTokenIssuedAt}, access_token_expires_at = #{accessTokenExpiresAt}, access_token_metadata = #{accessTokenMetadata}, access_token_type = #{accessTokenType}, access_token_scopes = #{accessTokenScopes},
+            oidc_id_token_value = #{oidcIdTokenValue}, oidc_id_token_issued_at = #{oidcIdTokenIssuedAt}, oidc_id_token_expires_at = #{oidcIdTokenExpiresAt}, oidc_id_token_metadata = #{oidcIdTokenMetadata},
+            refresh_token_value = #{refreshTokenValue}, refresh_token_issued_at = #{refreshTokenIssuedAt}, refresh_token_expires_at = #{refreshTokenExpiresAt}, refresh_token_metadata = #{refreshTokenMetadata},
+    	    updated_at = now()
+    	where id = #{id}
+    </update>
+   
+    <delete id="delete" parameterType="java.lang.Long">
+    	delete from <include refid="table"/>
+    	where id = #{id}
+    </delete>
+
+    <select id="findByUnknownTokenType" resultMap="OAuth2AuthorizationResultMap" parameterType="java.lang.String" >
+        SELECT
+        id,<include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where state = #{token} OR authorization_code_value = #{token} OR access_token_value = #{token} OR refresh_token_value = #{token}
+    </select>
+    <select id="findByState" resultMap="OAuth2AuthorizationResultMap" parameterType="java.lang.String" >
+        SELECT
+        id,<include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where state = #{token}
+    </select>
+    <select id="findByAuthorizationCode" resultMap="OAuth2AuthorizationResultMap" parameterType="java.lang.String" >
+        SELECT
+        id,<include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where authorization_code_value = #{token}
+    </select>
+    <select id="findByAccessToken" resultMap="OAuth2AuthorizationResultMap" parameterType="java.lang.String" >
+        SELECT
+        id,<include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where access_token_value = #{token}
+    </select>
+    <select id="findByRefreshToken" resultMap="OAuth2AuthorizationResultMap" parameterType="java.lang.String" >
+        SELECT
+        id,<include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where refresh_token_value = #{token}
+    </select>
+</mapper>

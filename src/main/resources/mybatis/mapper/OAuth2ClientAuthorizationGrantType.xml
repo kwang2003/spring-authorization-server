@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="example.dao.ClientAuthorizationScopeDao" >
-    <resultMap id="ClientAuthorizationScopeResultMap" type="ClientAuthorizationScope" >
+<mapper namespace="example.dao.OAuth2ClientAuthorizationGrantTypeDao" >
+    <resultMap id="OAuth2ClientAuthorizationGrantTypeMap" type="OAuth2ClientAuthorizationGrantType" >
         <id column="id" property="id"/>
         <result column="client_id" property="clientId" />
-        <result column="method" property="method" />
+        <result column="grant_type" property="grantType" />
     </resultMap>
     <sql id="Base_Column_List" >
-        client_id, scope
+        client_id, grant_type
     </sql>
-    <sql id="table">client_authentication_scope</sql>
+    <sql id="table">oauth2_client_authorization_grant_type</sql>
     
 
-    <select id="getByClientId" resultMap="ClientAuthorizationScopeResultMap" parameterType="java.lang.String" >
+    <select id="getByClientId" resultMap="OAuth2ClientAuthorizationGrantTypeMap" parameterType="java.lang.String" >
         SELECT
         <include refid="Base_Column_List" />
         FROM <include refid="table"/>
         where client_id = #{clientId}
     </select>
-    <insert id="insert" parameterType="ClientAuthorizationScope" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="OAuth2ClientAuthorizationGrantType" useGeneratedKeys="true" keyProperty="id">
     	insert into  <include refid="table"/>
     	(<include refid="Base_Column_List" />)
-    	values(#{clientId},#{method})
+    	values(#{clientId},#{grantType})
     </insert>
-    <update id="update" parameterType="ClientAuthorizationScope">
+    <update id="update" parameterType="OAuth2ClientAuthorizationGrantType">
     	update <include refid="table"/>
     	set name = #{name},
     	value = #{value}

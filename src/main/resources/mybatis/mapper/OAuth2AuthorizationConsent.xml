@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="example.dao.OAuth2AuthorizationConsentDao" >
+    <resultMap id="OAuth2AuthorizationConsentResultMap" type="OAuth2AuthorizationConsent" >
+        <id column="id" property="id"/>
+        <result column="client_id" property="clientId" />
+        <result column="principal_name" property="principalName" />
+        <result column="authorities" property="authorities" />
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        client_id, principal_name,authorities,created_at,updated_at
+    </sql>
+    <sql id="table">oauth2_authorization_consent</sql>
+
+    <select id="getByClientIdPrincipalName" resultMap="OAuth2AuthorizationConsentResultMap" parameterType="java.util.Map" >
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM <include refid="table"/>
+        where client_id = #{clientId}
+        and principal_name =#{principalName}
+    </select>
+    <insert id="insert" parameterType="OAuth2AuthorizationConsent" useGeneratedKeys="true" keyProperty="id">
+    	insert into  <include refid="table"/>
+    	(<include refid="Base_Column_List" />)
+    	values(#{clientId},#{principalName}, #{authorities},now(),now())
+    </insert>
+    <update id="update" parameterType="OAuth2AuthorizationConsent">
+    	update <include refid="table"/>
+    	set authorities = #{authorities},
+            updated_at = now()
+    	where client_id = #{clientId}
+        and principal_name =#{principalName}
+    </update>
+   
+    <delete id="delete" parameterType="java.util.Map">
+    	delete from <include refid="table"/>
+        where client_id = #{clientId}
+        and principal_name =#{principalName}
+    </delete>  
+</mapper>

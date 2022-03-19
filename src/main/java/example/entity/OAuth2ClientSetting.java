@@ -11,7 +11,7 @@ import lombok.Data;
  *
  */
 @Data
-public class ClientSetting implements Serializable {
+public class OAuth2ClientSetting implements Serializable {
 	private static final long serialVersionUID = -7370265956276958570L;
 	private Long id;
 	private String clientId;

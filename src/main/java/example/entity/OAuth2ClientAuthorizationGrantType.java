@@ -5,8 +5,8 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class ClientAuthorizationScope implements Serializable {
+public class OAuth2ClientAuthorizationGrantType implements Serializable {
     private Long id;
     private String clientId;
-    private String scope;
+    private String grantType;
 }

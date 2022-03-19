@@ -11,7 +11,7 @@ import lombok.Data;
  *
  */
 @Data
-public class TokenSetting implements Serializable {
+public class OAuth2TokenSetting implements Serializable {
 	private static final long serialVersionUID = -7370265956276958570L;
 	private Long id;
 	private String clientId;

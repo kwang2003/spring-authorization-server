@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-public class Client implements Serializable {
+public class OAuth2Client implements Serializable {
     private String id;
     private String clientId;
     private LocalDateTime clientIdIssuedAt;

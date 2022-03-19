@@ -1,15 +1,12 @@
 package example.authentication;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import example.dto.ClientDto;
-import example.entity.Client;
-import example.service.ClientDetailService;
-import org.apache.ibatis.type.IntegerTypeHandler;
+import example.dto.OAuth2ClientDto;
+import example.entity.OAuth2Client;
+import example.service.OAuth2ClientDetailService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -22,17 +19,15 @@ import org.springframework.security.oauth2.server.authorization.config.TokenSett
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @Component
 public class RemoteRegisteredClientRepository implements RegisteredClientRepository, InitializingBean {
     @Resource
-    private ClientDetailService clientDetailService;
+    private OAuth2ClientDetailService oAuth2ClientDetailService;
     private TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
     @Override
     public void save(RegisteredClient registeredClient) {
@@ -41,20 +36,18 @@ public class RemoteRegisteredClientRepository implements RegisteredClientReposit
 
     @Override
     public RegisteredClient findById(String id) {
-        ClientDto dto = clientDetailService.get(id);
+        OAuth2ClientDto dto = oAuth2ClientDetailService.get(id);
         return Optional.ofNullable(convert(dto)).orElse(null);
     }
 
     @Override
     public RegisteredClient findByClientId(String clientId) {
-        ClientDto dto = clientDetailService.getByClientId(clientId);
+        OAuth2ClientDto dto = oAuth2ClientDetailService.getByClientId(clientId);
         return Optional.ofNullable(convert(dto)).orElse(null);
     }
 
-    private RegisteredClient convert(ClientDto clientDto){
-        Client client = clientDto.getClient();
-        
-        //TODO token settings
+    private RegisteredClient convert(OAuth2ClientDto clientDto){
+        OAuth2Client client = clientDto.getClient();
 
         Builder builder = RegisteredClient.withId(client.getId());
         builder
@@ -119,10 +112,10 @@ public class RemoteRegisteredClientRepository implements RegisteredClientReposit
         SignatureAlgorithmTypeHandler signatureAlgorithmTypeHandler = new SignatureAlgorithmTypeHandler();
         JwsAlgorithmTypeHandler jwsAlgorithmTypeHandler = new JwsAlgorithmTypeHandler();
 
-        typeHandlerRegistry.regist(Token.REUSE_REFRESH_TOKENS,booleanTypeHandler);
-        typeHandlerRegistry.regist(Token.ACCESS_TOKEN_TIME_TO_LIVE,durationTypeHandler);
-        typeHandlerRegistry.regist(Token.REFRESH_TOKEN_TIME_TO_LIVE,durationTypeHandler);
-        typeHandlerRegistry.regist(Token.ID_TOKEN_SIGNATURE_ALGORITHM,signatureAlgorithmTypeHandler);
+        typeHandlerRegistry.regist(ConfigurationSettingNames.Token.REUSE_REFRESH_TOKENS,booleanTypeHandler);
+        typeHandlerRegistry.regist(ConfigurationSettingNames.Token.ACCESS_TOKEN_TIME_TO_LIVE,durationTypeHandler);
+        typeHandlerRegistry.regist(ConfigurationSettingNames.Token.REFRESH_TOKEN_TIME_TO_LIVE,durationTypeHandler);
+        typeHandlerRegistry.regist(ConfigurationSettingNames.Token.ID_TOKEN_SIGNATURE_ALGORITHM,signatureAlgorithmTypeHandler);
 
         typeHandlerRegistry.regist(ConfigurationSettingNames.Client.REQUIRE_PROOF_KEY,booleanTypeHandler);
         typeHandlerRegistry.regist(ConfigurationSettingNames.Client.REQUIRE_AUTHORIZATION_CONSENT,booleanTypeHandler);

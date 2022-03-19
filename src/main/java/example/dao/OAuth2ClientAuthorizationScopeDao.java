@@ -1,22 +1,22 @@
 package example.dao;
 
-import example.entity.ClientAuthorizationGrantType;
+import example.entity.OAuth2ClientAuthorizationScope;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public class ClientAuthorizationGrantTypeDao extends AbstractDao{
-    public void insert(ClientAuthorizationGrantType clientSetting) {
+public class OAuth2ClientAuthorizationScopeDao extends AbstractDao{
+    public void insert(OAuth2ClientAuthorizationScope clientSetting) {
         this.getSqlSession().insert(getNamespacePrefix() + "insert", clientSetting);
     }
-    public ClientAuthorizationGrantType get(Long id) {
+    public OAuth2ClientAuthorizationScope get(Long id) {
         return this.getSqlSession().selectOne(getNamespacePrefix()+"getById", id);
     }
-    public List<ClientAuthorizationGrantType> getByClientId(String clientId){
+    public List<OAuth2ClientAuthorizationScope> getByClientId(String clientId){
         return this.getSqlSession().selectList(getNamespacePrefix()+"getByClientId", clientId);
     }
-    public int update(ClientAuthorizationGrantType setting) {
+    public int update(OAuth2ClientAuthorizationScope setting) {
         return this.getSqlSession().update(getNamespacePrefix()+"update", setting);
     }
     public int delete(Long id) {
