@@ -82,8 +82,9 @@ void testRefresh() throws IOException {
 ```
 
 ## 4.5 PKCE模式
-PKCE模式是授权码模式的增强版本，属于OAuth2.1新增的内容，主要是解决开放客户端授权回调被恶意拦截的问题，比授权码模式更加安全
+PKCE模式是授权码模式的增强版本，属于OAuth2.1新增的内容，主要是解决开放客户端授权回调被恶意拦截的问题，比授权码模式更加安全，另外PKCE模式提供了对app端以及单页面应用（Single Page Application）的支持，在此模式下，不需要传递client_secret
 ```java
+//PKCE模式1：在code模式基础上添加pkce参数，其他所有参数和传参方法不变
 void testPkce() throws IOException {
     String redirectUrl = "http://www.baidu.com";
     String url = ENDPOINT+ UriComponentsBuilder
@@ -102,6 +103,36 @@ void testPkce() throws IOException {
     List<NameValuePair> params = Lists.newArrayList();
     params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"authorization_code"));
     params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"8LhY5lGoXsM991tXLbvew5bx-jN0T_zN-IhYB-qPUCZRRiz6jpw_g2aILuonEskazxS2qowQzkZDEtH0PPrPDwUBwYKhpsTwXadm2k-PnuJMSe7GQqd5jKuh9vgofhxi"));
+    params.add(new BasicNameValuePair(OAuth2ParameterNames.STATE,"some-state"));
+    params.add(new BasicNameValuePair(OAuth2ParameterNames.REDIRECT_URI,"http://www.baidu.com"));
+    params.add(new BasicNameValuePair(PkceParameterNames.CODE_VERIFIER,"SWv.9QcLNnTC9i5qYN_p_T4tH0y6mlJZb71VU.FrLHvgC1UTwWTEVWb8zIjuR2OZC2i6HN3A_5qI9hzAHJ4JLIU6lZLI0pb1ugn8X1nx8sxQ21DYmpLBW5uj2Cdj~AlF"));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+    execute(httpPost);
+    // {"access_token":"eyJraWQiOiI2N2E0YTBhZC00N2I5LTRiN2EtOTZkYy1jZTNhOGFiMjA5ODEiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyMSIsImF1ZCI6Im1lc3NhZ2luZy1jbGllbnQiLCJuYmYiOjE2NDc1ODM5ODYsInNjb3BlIjpbIm1lc3NhZ2Uud3JpdGUiXSwiaXNzIjoiaHR0cDpcL1wvYXV0aC1zZXJ2ZXI6OTAwMCIsImV4cCI6MTY0NzU4NDI4NiwiaWF0IjoxNjQ3NTgzOTg2fQ.MYycfMpkOR2gyWIGoepeL0H3U_nvLy7uFW80Nu76fztynYa9wxLw4swEqwXuidlK5YO7oyyNR5WOILyCJ9uQamlj8xvmeSOp_QxSZQzygm2-RNbBVw5EjokCZ2j8axW6gCMQNf7PePFMEkM047l5d7PvQDfzhO5ept5_HjXcjQ5zwLVDTcjYfvY9vcROwzrhwEHETOgRDB_DX5iUuA25IlIa_qWR7qI1li7ClMrf9pxldHV5KTCry2NDRxC3GVw17GA58w-Lb4F6Atgwl9Pl3hz82U45HvIYN3R-43w10jbZRjMr1K90ZDRZq1QyvFci7ehSVxAD_PtVm05v1ZoZiQ","refresh_token":"doDkhiBrVvv-0_J8q2rhwUAmqhw2tgtjAZ4LUUgqSdRaP9W4PsmjJOI6BdJ1S6A_fQqEzYtTd9c_uTX58xBvE4y1qedUoXy0oMT_Z3X7iQ6wpc7sFdyoBjqhI_odgeKX","scope":"message.write","token_type":"Bearer","expires_in":300}
+}
+```
+```java
+// PKCE模式2，不需要传递client_secret,该模式下，client_id必须通过client_secret_post方法传递，Basic 模式下通过header传递不可行
+void testPkce2() throws IOException {
+    String redirectUrl = "http://www.baidu.com";
+    String url = ENDPOINT+ UriComponentsBuilder
+            .fromPath("/oauth2/authorize")
+            .queryParam(OAuth2ParameterNames.RESPONSE_TYPE, "code")
+            .queryParam(OAuth2ParameterNames.CLIENT_ID, "messaging-client")
+//                .queryParam("scope", "openid")
+            .queryParam(OAuth2ParameterNames.STATE, "some-state")
+            .queryParam(OAuth2ParameterNames.REDIRECT_URI, redirectUrl)
+            .queryParam(PkceParameterNames.CODE_CHALLENGE,"23lwVh3xPX1ckZmTTzvoh6zY_L4gi2rvd4s9kKF9FQE")
+            .queryParam(PkceParameterNames.CODE_CHALLENGE_METHOD,"S256")
+            .toUriString();
+    System.out.println(url);
+    //浏览器访问 http://localhost:9000/oauth2/authorize?response_type=code&client_id=messaging-client&state=some-state&scope=message.write&code_challenge_method=S256&code_challenge=23lwVh3xPX1ckZmTTzvoh6zY_L4gi2rvd4s9kKF9FQE&redirect_uri=http://www.baidu.com
+//        HttpPost httpPost = createHttpPost("messaging-client",null);
+    HttpPost httpPost = new HttpPost(TOKEN_ENDPOINT);
+    List<NameValuePair> params = Lists.newArrayList();
+    params.add(new BasicNameValuePair("client_id","messaging-client"));
+    params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"authorization_code"));
+    params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"1SfS3cFSfIonVRCCWIKdatjYuIXu671tAyhs_ItgO0izssFDi7ZtA4yQRwZORpu5aXRAfKItuyLCNbbAZedJEFrwEIN3P3xkEWVdQyt_MisHzwvhHTEzEL5ZkdDBo36b"));
     params.add(new BasicNameValuePair(OAuth2ParameterNames.STATE,"some-state"));
     params.add(new BasicNameValuePair(OAuth2ParameterNames.REDIRECT_URI,"http://www.baidu.com"));
     params.add(new BasicNameValuePair(PkceParameterNames.CODE_VERIFIER,"SWv.9QcLNnTC9i5qYN_p_T4tH0y6mlJZb71VU.FrLHvgC1UTwWTEVWb8zIjuR2OZC2i6HN3A_5qI9hzAHJ4JLIU6lZLI0pb1ugn8X1nx8sxQ21DYmpLBW5uj2Cdj~AlF"));
@@ -139,8 +170,8 @@ password
 表示对客户端认证的方法，可以是下列表中的一个或多个
 ```shell
 client_secret_basic
-basic
-post
+basic #已经废弃，改成client_secret_basic
+post  #已经废弃，改成使用client_secret_post
 client_secret_post
 client_secret_jwt
 private_key_jwt
