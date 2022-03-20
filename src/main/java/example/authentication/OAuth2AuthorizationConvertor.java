@@ -44,7 +44,7 @@ public class OAuth2AuthorizationConvertor {
         List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
         this.objectMapper.registerModules(securityModules);
         this.objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
-//        this.objectMapper.registerModule();//CoreJackson2Module
+        this.objectMapper.registerModule(new OAuth2ObjectModule());//CoreJackson2Module
     }
 
     public OAuth2Authorization from(org.springframework.security.oauth2.server.authorization.OAuth2Authorization authorization){
