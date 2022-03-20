@@ -142,6 +142,23 @@ void testPkce2() throws IOException {
 }
 ```
 
+## 4.6 撤销token
+撤销token需要传递client_id,client_secret和token参数
+请求地址："/oauth2/revoke"
+撤销成功后返回200状态码
+```java
+void testRevoke() throws IOException {
+    String accessToken = "eyJraWQiOiI3NjI0NDI1ZC0wYjAxLTQwNjctYTVlYS0zZmZiNmE2OWMwMzAiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyMSIsImF1ZCI6Im1lc3NhZ2luZy1jbGllbnQiLCJuYmYiOjE2NDc3NDM4MzQsInNjb3BlIjpbIm1lc3NhZ2Uud3JpdGUiXSwiaXNzIjoiaHR0cDpcL1wvYXV0aC1zZXJ2ZXI6OTAwMCIsImV4cCI6MTY0Nzc0NDEzNCwiaWF0IjoxNjQ3NzQzODM0fQ.Ji3KIx53oA9dzu5anFPqNbjYQvEVayaVVJ4CRgGyUONXDS1k_92m3ikS2Ckzs0uaGjy7eLrPWUuCcNUhPSM0-CWQjiaaGaqag6inb49oET9Ul7OA202gLoMidx-1q2WSLu8qUekELy619HPwN4B_OsHA5v1ZKx5h8g8gefDKhJB3gEMiNZgIhTd3WKTYxyJUF1uj39kWcxsNW5PnwbkfwMILKCGsHd8CLjE7OBIrudPnA5hqCc96--_gJZuuDIRm4ZpcGlK1Zl5TozM4uuBQGMtbLSdjOJ9w3nT5ugphTc4W9g70_g50SZI6A7zKmudfmuEZC0Qa7c4DG8jzMG99sg";
+    HttpPost httpPost = new HttpPost(REVOKE_TOKEN_ENDPOINT);
+    List<NameValuePair> params = Lists.newArrayList();
+    params.add(new BasicNameValuePair(OAuth2ParameterNames.CLIENT_ID,"messaging-client"));
+    params.add(new BasicNameValuePair(OAuth2ParameterNames.CLIENT_SECRET,"secret"));
+    params.add(new BasicNameValuePair(OAuth2ParameterNames.TOKEN,accessToken));
+    httpPost.setEntity(new UrlEncodedFormEntity(params));
+    execute(httpPost);
+}
+```
+
 # 5. 功能扩展
 ## 5.1 新建客户端OAuth2Client信息
 ### oauth2_token_setting表

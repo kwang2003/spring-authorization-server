@@ -53,6 +53,6 @@ public class OAuth2AuthorizationServiceImpl implements OAuth2AuthorizationServic
 
     @Override
     public OAuth2Authorization findByRefreshToken(String token) {
-        return null;
+        return oAuth2AuthorizationDao.findByRefreshToken(token);
     }
 }

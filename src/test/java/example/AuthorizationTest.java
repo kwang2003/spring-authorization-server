@@ -28,6 +28,7 @@ class AuthorizationTest {
     private HttpClient httpClient = HttpClients.createDefault();
     private static final String ENDPOINT = "http://localhost:9000";
     private static final String TOKEN_ENDPOINT = ENDPOINT+"/oauth2/token";
+    private static final String REVOKE_TOKEN_ENDPOINT =ENDPOINT +"/oauth2/revoke";
     private Gson gson = new Gson();
 
     private HttpPost createHttpPost(){
@@ -118,7 +119,7 @@ class AuthorizationTest {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
         params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"authorization_code"));
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"0qyMvJQZgwvsrtadcVj7IyFGsAgXB0LNHdjefdiuPwb6zaDdBKdEDSzEZ4l1kY0K7-F5sUfHc5OqwXSGyfJXjY82NSDpPPM6Kz59cJ3J2SlP_zGTo7__jeBqJ8DvigNm"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"r3F9mLj4lvp_g9ZJN7mU6eWSVoha4rtfhK13Oa4kRTavaFUZrdxk0DwmUd6ceuQOAs8TPuDSUpxDOXMzcJjdrEPTT5xxcy9Zv8hJ30Wwb61Cta0FuCKAM0r5pEIwxmeq"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.STATE,"some-state"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.REDIRECT_URI,"http://www.baidu.com"));
         params.add(new BasicNameValuePair(PkceParameterNames.CODE_VERIFIER,"SWv.9QcLNnTC9i5qYN_p_T4tH0y6mlJZb71VU.FrLHvgC1UTwWTEVWb8zIjuR2OZC2i6HN3A_5qI9hzAHJ4JLIU6lZLI0pb1ugn8X1nx8sxQ21DYmpLBW5uj2Cdj~AlF"));
@@ -157,16 +158,28 @@ class AuthorizationTest {
         // {"access_token":"eyJraWQiOiI2N2E0YTBhZC00N2I5LTRiN2EtOTZkYy1jZTNhOGFiMjA5ODEiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyMSIsImF1ZCI6Im1lc3NhZ2luZy1jbGllbnQiLCJuYmYiOjE2NDc1ODM5ODYsInNjb3BlIjpbIm1lc3NhZ2Uud3JpdGUiXSwiaXNzIjoiaHR0cDpcL1wvYXV0aC1zZXJ2ZXI6OTAwMCIsImV4cCI6MTY0NzU4NDI4NiwiaWF0IjoxNjQ3NTgzOTg2fQ.MYycfMpkOR2gyWIGoepeL0H3U_nvLy7uFW80Nu76fztynYa9wxLw4swEqwXuidlK5YO7oyyNR5WOILyCJ9uQamlj8xvmeSOp_QxSZQzygm2-RNbBVw5EjokCZ2j8axW6gCMQNf7PePFMEkM047l5d7PvQDfzhO5ept5_HjXcjQ5zwLVDTcjYfvY9vcROwzrhwEHETOgRDB_DX5iUuA25IlIa_qWR7qI1li7ClMrf9pxldHV5KTCry2NDRxC3GVw17GA58w-Lb4F6Atgwl9Pl3hz82U45HvIYN3R-43w10jbZRjMr1K90ZDRZq1QyvFci7ehSVxAD_PtVm05v1ZoZiQ","refresh_token":"doDkhiBrVvv-0_J8q2rhwUAmqhw2tgtjAZ4LUUgqSdRaP9W4PsmjJOI6BdJ1S6A_fQqEzYtTd9c_uTX58xBvE4y1qedUoXy0oMT_Z3X7iQ6wpc7sFdyoBjqhI_odgeKX","scope":"message.write","token_type":"Bearer","expires_in":300}
     }
 
-
     @Test
     @DisplayName("刷新令牌")
     void testRefresh() throws IOException {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
         params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE, AuthorizationGrantType.REFRESH_TOKEN.getValue()));
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.REFRESH_TOKEN,"bt7SXMZOelDLwme8ulf7SzqEPmYNEiCr4DbIs-ad3qyfEETBohy1_ztz13rn1L4ARvaxSHbz4Gblh_Rypdlgm6FMATGlHVBPL5e39rJTfKGbOP_2N6lndOqIT9dRzsvA"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.REFRESH_TOKEN,"YV77dCumojG1GWHt5hgtg7zQd6s0PCW8CW7IBrnIrjU3LZ7Enh6dyLRvkaQnB-goeqSHKGE8Pjm9zEJxZxUSTQKYDZRNNonFmlkjWqb-ViLVQiSnstZY9-a2X_hlejbU"));
         httpPost.setEntity(new UrlEncodedFormEntity(params));
         execute(httpPost);
         //重新生成access_token令牌，refresh_token的值不变
+    }
+
+    @Test
+    @DisplayName("撤销令牌")
+    void testRevoke() throws IOException {
+        String accessToken = "eyJraWQiOiI3NjI0NDI1ZC0wYjAxLTQwNjctYTVlYS0zZmZiNmE2OWMwMzAiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyMSIsImF1ZCI6Im1lc3NhZ2luZy1jbGllbnQiLCJuYmYiOjE2NDc3NDM4MzQsInNjb3BlIjpbIm1lc3NhZ2Uud3JpdGUiXSwiaXNzIjoiaHR0cDpcL1wvYXV0aC1zZXJ2ZXI6OTAwMCIsImV4cCI6MTY0Nzc0NDEzNCwiaWF0IjoxNjQ3NzQzODM0fQ.Ji3KIx53oA9dzu5anFPqNbjYQvEVayaVVJ4CRgGyUONXDS1k_92m3ikS2Ckzs0uaGjy7eLrPWUuCcNUhPSM0-CWQjiaaGaqag6inb49oET9Ul7OA202gLoMidx-1q2WSLu8qUekELy619HPwN4B_OsHA5v1ZKx5h8g8gefDKhJB3gEMiNZgIhTd3WKTYxyJUF1uj39kWcxsNW5PnwbkfwMILKCGsHd8CLjE7OBIrudPnA5hqCc96--_gJZuuDIRm4ZpcGlK1Zl5TozM4uuBQGMtbLSdjOJ9w3nT5ugphTc4W9g70_g50SZI6A7zKmudfmuEZC0Qa7c4DG8jzMG99sg";
+        HttpPost httpPost = new HttpPost(REVOKE_TOKEN_ENDPOINT);
+        List<NameValuePair> params = Lists.newArrayList();
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.CLIENT_ID,"messaging-client"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.CLIENT_SECRET,"secret"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.TOKEN,accessToken));
+        httpPost.setEntity(new UrlEncodedFormEntity(params));
+        execute(httpPost);
     }
 }
