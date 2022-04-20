@@ -1,10 +1,9 @@
 package example.authentication;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationGrantAuthenticationToken;
 
 import java.util.Collections;
@@ -17,13 +16,6 @@ import java.util.Set;
  */
 public class OAuth2PasswordCredentialsAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
     private final Set<String> scopes;
-    @Getter
-    @Setter
-    private String username;
-    @Getter
-    @Setter
-    private String password;
-
     /**
      * Constructs an {@code OAuth2ClientCredentialsAuthenticationToken} using the provided parameters.
      *
@@ -45,5 +37,10 @@ public class OAuth2PasswordCredentialsAuthenticationToken extends OAuth2Authoriz
      */
     public Set<String> getScopes() {
         return this.scopes;
+    }
+
+    @Override
+    public Object getCredentials() {
+        return this.getAdditionalParameters().get(OAuth2ParameterNames.PASSWORD);
     }
 }

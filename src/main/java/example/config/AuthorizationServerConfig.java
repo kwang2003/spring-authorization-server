@@ -7,26 +7,27 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import example.authentication.OAuth2PasswordCredentialsAuthenticationConverter;
 import example.authentication.OAuth2PasswordCredentialsAuthenticationProvider;
+import example.authentication.federated.FederatedIdentityIdTokenCustomizer;
 import example.jose.Jwks;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwsEncoder;
-import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenCustomizer;
 import org.springframework.security.oauth2.server.authorization.config.ProviderSettings;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.oauth2.server.authorization.web.authentication.DelegatingAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2ClientCredentialsAuthenticationConverter;
@@ -34,6 +35,7 @@ import org.springframework.security.oauth2.server.authorization.web.authenticati
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import javax.xml.ws.WebEndpoint;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,6 +58,7 @@ public class AuthorizationServerConfig {
                         new OAuth2ClientCredentialsAuthenticationConverter(),
                         new OAuth2PasswordCredentialsAuthenticationConverter()))
         )));
+//        http.apply(new FederatedIdentityConfigurer());
         authorizationServerConfigurer.authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI));
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
         http
@@ -82,20 +85,11 @@ public class AuthorizationServerConfig {
         return securityFilterChain;
     }
 
-//    @Bean
-    public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
-        return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
-    }
-
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
         RSAKey rsaKey = Jwks.generateRsa();
         JWKSet jwkSet = new JWKSet(rsaKey);
         return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
-    }
-    @Bean
-    public NimbusJwsEncoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-        return new NimbusJwsEncoder(jwkSource);
     }
 
     @Bean
@@ -103,7 +97,6 @@ public class AuthorizationServerConfig {
         return ProviderSettings.builder().issuer("http://auth-server:9000").build();
     }
 
-    // @formatter:on
     @Bean
     public PasswordEncoder passwordEncoder(){
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -114,13 +107,12 @@ public class AuthorizationServerConfig {
      * @return
      */
     @Bean
-    public OAuth2PasswordCredentialsAuthenticationProvider oAuth2PasswordCredentialsAuthenticationProvider(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService, OAuth2AuthorizationService oAuth2AuthorizationService, JwtEncoder jwtEncoder,ProviderSettings providerSettings){
-        OAuth2PasswordCredentialsAuthenticationProvider provider = new OAuth2PasswordCredentialsAuthenticationProvider();
+    public OAuth2PasswordCredentialsAuthenticationProvider oAuth2PasswordCredentialsAuthenticationProvider(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService, OAuth2AuthorizationService oAuth2AuthorizationService, HttpSecurityBuilder httpSecurityBuilder){
+        OAuth2TokenGenerator tokenGenerator = OAuth2ConfigurerUtils.getTokenGenerator(httpSecurityBuilder);
+        OAuth2PasswordCredentialsAuthenticationProvider provider = new OAuth2PasswordCredentialsAuthenticationProvider(tokenGenerator);
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         provider.setAuthorizationService(oAuth2AuthorizationService);
-        provider.setJwtEncoder(jwtEncoder);
-        provider.setProviderSettings(providerSettings);
         return provider;
     }
 
@@ -130,5 +122,10 @@ public class AuthorizationServerConfig {
         daoAuthenticationProvider.setUserDetailsService(userDetailsService);
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
         return daoAuthenticationProvider;
+    }
+
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer(){
+        return new FederatedIdentityIdTokenCustomizer();
     }
 }

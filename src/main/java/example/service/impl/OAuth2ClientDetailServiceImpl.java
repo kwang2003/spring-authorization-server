@@ -1,5 +1,6 @@
 package example.service.impl;
 
+import com.google.common.base.Preconditions;
 import example.dao.OAuth2ClientAuthenticationMethodDao;
 import example.dao.OAuth2ClientAuthorizationGrantTypeDao;
 import example.dao.OAuth2ClientDao;
@@ -56,6 +57,41 @@ public class OAuth2ClientDetailServiceImpl implements OAuth2ClientDetailService 
 
         return create(client);
     }
+
+    @Override
+    public OAuth2ClientDto save(OAuth2ClientDto client) {
+        Preconditions.checkNotNull(client,"参数不能为空");
+        OAuth2Client dbClient = oAuth2ClientDao.get(client.getClient().getId());
+        //插入操作
+        if(dbClient == null){
+            return doInsert(client);
+        }
+        throw new IllegalArgumentException("不支持改操作");
+    }
+
+    private OAuth2ClientDto doInsert(OAuth2ClientDto client){
+        oAuth2ClientDao.insert(client.getClient());
+        client.getClientAuthenticationMethods().forEach(m ->{
+            oAuth2ClientAuthenticationMethodDao.insert(m);
+        });
+        client.getClientSettings().forEach(s ->{
+            oAuth2ClientSettingDao.insert(s);
+        });
+        client.getTokenSettings().forEach(s ->{
+            oAuth2TokenSettingDao.insert(s);
+        });
+        client.getClientAuthorizationGrantTypes().forEach(t ->{
+            oAuth2ClientAuthorizationGrantTypeDao.insert(t);
+        });
+        client.getClientAuthorizationScopes().forEach(s ->{
+            oAuth2ClientAuthorizationScopeDao.insert(s);
+        });
+        client.getClientRedirectUris().forEach(u ->{
+            oAuth2ClientRedirectUriDao.insert(u);
+        });
+        return client;
+    }
+
 
     private OAuth2ClientDto create(OAuth2Client client){
         OAuth2ClientDto dto = new OAuth2ClientDto();

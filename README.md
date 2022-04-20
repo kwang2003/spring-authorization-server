@@ -161,12 +161,14 @@ void testRevoke() throws IOException {
 
 # 5. 功能扩展
 ## 5.1 新建客户端OAuth2Client信息
+每次新增一个client都需要往如下数据库表中添加以下记录
 ### oauth2_token_setting表
 ```shell
 settings.token.reuse-refresh-tokens=true
 settings.token.id-token-signature-algorithm=RS256
 settings.token.access-token-time-to-live=300 #秒
 settings.token.refresh-token-time-to-live=3600 #秒
+settings.token.access-token-format=self-contained #jwt自包含业务信息
 ```
 ### oauth2_client_setting
 ```shell

@@ -1,5 +1,6 @@
 package example.authentication;
 
+import com.google.common.collect.Maps;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -51,7 +52,7 @@ public class OAuth2PasswordCredentialsAuthenticationConverter implements Authent
                     Arrays.asList(StringUtils.delimitedListToStringArray(scope, " ")));
         }
 
-        Map<String, Object> additionalParameters = new HashMap<>();
+        Map<String, Object> additionalParameters = Maps.newHashMap();
         parameters.forEach((key, value) -> {
             if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) &&
                     !key.equals(OAuth2ParameterNames.SCOPE)) {
@@ -78,8 +79,6 @@ public class OAuth2PasswordCredentialsAuthenticationConverter implements Authent
 
         OAuth2PasswordCredentialsAuthenticationToken oAuth2PasswordCredentialsAuthenticationToken = new OAuth2PasswordCredentialsAuthenticationToken(
                 clientPrincipal, requestedScopes, additionalParameters);
-        oAuth2PasswordCredentialsAuthenticationToken.setPassword(password);
-        oAuth2PasswordCredentialsAuthenticationToken.setUsername(username);
         return oAuth2PasswordCredentialsAuthenticationToken;
     }
 

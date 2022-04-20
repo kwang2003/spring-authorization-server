@@ -64,6 +64,19 @@ class AuthorizationTest {
     }
 
     @Test
+    @DisplayName("password并使用openid")
+    void testPasswordOpenid() throws IOException {
+        HttpPost httpPost = createHttpPost();
+        List<NameValuePair> params = Lists.newArrayList();
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"password"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.USERNAME,"user1"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.PASSWORD,"password"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.SCOPE,"openid"));
+        httpPost.setEntity(new UrlEncodedFormEntity(params));
+        execute(httpPost);
+    }
+
+    @Test
     @DisplayName("客户端模式")
     void testClient() throws IOException {
         HttpPost httpPost = createHttpPost();
@@ -91,7 +104,7 @@ class AuthorizationTest {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
         params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"authorization_code"));
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"VXykrhT2aAe4_9xUOA3FgO3tSo6PYHwz0_i1HUdIgYVckC1sGRdUxkLcbbpPyLH__LNbugT0fytQh02skH4je0AtTIQzjjKmiQfhr-m_2JdlAKxi8LAcuSqgFckWAKpm"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"cjLZxOLWKfsTvbfJCeEk3qKS0PD-8lMcFj1HAZeOGHyI7wotnLLzYx91IPIv3t7_aFKjs3gytSWJJyh0R5PGpYXtwosi64WLkbQG28eL697kt1-snkesei1lzsmpPtJM"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.STATE,"some-state"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.REDIRECT_URI,"http://www.baidu.com"));
         httpPost.setEntity(new UrlEncodedFormEntity(params));
@@ -119,7 +132,7 @@ class AuthorizationTest {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
         params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE,"authorization_code"));
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"r3F9mLj4lvp_g9ZJN7mU6eWSVoha4rtfhK13Oa4kRTavaFUZrdxk0DwmUd6ceuQOAs8TPuDSUpxDOXMzcJjdrEPTT5xxcy9Zv8hJ30Wwb61Cta0FuCKAM0r5pEIwxmeq"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.CODE,"5rAsjANhJcyILdcc6WuSb27O5VHuE5fIBIurK8EdZw417ZDpcwb2ypN7RyNRdxccbjl9NaODMZcSmLuVEgeYSGCHlQULo65sq7_EIYTaLBxOoBGezejIcCH9_kztv3yp"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.STATE,"some-state"));
         params.add(new BasicNameValuePair(OAuth2ParameterNames.REDIRECT_URI,"http://www.baidu.com"));
         params.add(new BasicNameValuePair(PkceParameterNames.CODE_VERIFIER,"SWv.9QcLNnTC9i5qYN_p_T4tH0y6mlJZb71VU.FrLHvgC1UTwWTEVWb8zIjuR2OZC2i6HN3A_5qI9hzAHJ4JLIU6lZLI0pb1ugn8X1nx8sxQ21DYmpLBW5uj2Cdj~AlF"));
@@ -164,7 +177,7 @@ class AuthorizationTest {
         HttpPost httpPost = createHttpPost();
         List<NameValuePair> params = Lists.newArrayList();
         params.add(new BasicNameValuePair(OAuth2ParameterNames.GRANT_TYPE, AuthorizationGrantType.REFRESH_TOKEN.getValue()));
-        params.add(new BasicNameValuePair(OAuth2ParameterNames.REFRESH_TOKEN,"YV77dCumojG1GWHt5hgtg7zQd6s0PCW8CW7IBrnIrjU3LZ7Enh6dyLRvkaQnB-goeqSHKGE8Pjm9zEJxZxUSTQKYDZRNNonFmlkjWqb-ViLVQiSnstZY9-a2X_hlejbU"));
+        params.add(new BasicNameValuePair(OAuth2ParameterNames.REFRESH_TOKEN,"Ggi3GJA8M9PWmmJ3cTX22o8Ib6Rjjp6eLHAppWtEWD5XNMI41-HJeKCsBmfaJjd2GKGrNHqrvAkPv3zT4vFTh6nn5CnGzvhSIyu4Hgch_bxe8ww6cUL_G5h8HWzYPbZu"));
         httpPost.setEntity(new UrlEncodedFormEntity(params));
         execute(httpPost);
         //重新生成access_token令牌，refresh_token的值不变

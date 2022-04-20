@@ -1,12 +1,22 @@
 package example.authentication;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import example.dto.OAuth2ClientDto;
 import example.entity.OAuth2Client;
+import example.entity.OAuth2ClientAuthenticationMethod;
+import example.entity.OAuth2ClientAuthorizationGrantType;
+import example.entity.OAuth2ClientAuthorizationScope;
+import example.entity.OAuth2ClientRedirectUri;
+import example.entity.OAuth2ClientSetting;
 import example.service.OAuth2ClientDetailService;
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.OAuth2TokenFormat;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -20,9 +30,14 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.TimeZone;
 
 @Component
 public class RemoteRegisteredClientRepository implements RegisteredClientRepository, InitializingBean {
@@ -31,7 +46,9 @@ public class RemoteRegisteredClientRepository implements RegisteredClientReposit
     private TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
     @Override
     public void save(RegisteredClient registeredClient) {
-
+        Preconditions.checkNotNull(registeredClient,"参数不能为空");
+        OAuth2ClientDto clientDto = this.convert(registeredClient);
+        oAuth2ClientDetailService.save(clientDto);
     }
 
     @Override
@@ -44,6 +61,80 @@ public class RemoteRegisteredClientRepository implements RegisteredClientReposit
     public RegisteredClient findByClientId(String clientId) {
         OAuth2ClientDto dto = oAuth2ClientDetailService.getByClientId(clientId);
         return Optional.ofNullable(convert(dto)).orElse(null);
+    }
+
+    private OAuth2ClientDto convert(RegisteredClient registeredClient){
+        OAuth2ClientDto clientDto = new OAuth2ClientDto();
+        OAuth2Client client = new OAuth2Client();
+        client.setClientId(registeredClient.getClientId());
+        client.setId(registeredClient.getId());
+        client.setClientSecret(registeredClient.getClientSecret());
+        ZoneId zoneId = ZoneId.of("+8");
+        Optional.ofNullable(registeredClient.getClientIdIssuedAt()).ifPresent(ia ->{
+            client.setClientIdIssuedAt(LocalDateTime.ofInstant(ia, zoneId));
+        });
+        Optional.ofNullable(registeredClient.getClientSecretExpiresAt()).ifPresent(ex ->{
+            client.setClientSecretExpiresAt(LocalDateTime.ofInstant(ex,zoneId));
+        });
+        clientDto.setClient(client);
+
+        List<OAuth2ClientSetting> clientSettings = Lists.newArrayList();
+        Optional.ofNullable(registeredClient.getClientSettings()).ifPresent(settings ->{
+            settings.getSettings().entrySet().forEach(en ->{
+                OAuth2ClientSetting setting = new OAuth2ClientSetting();
+                setting.setClientId(registeredClient.getClientId());
+                setting.setName(en.getKey());
+                setting.setValue(en.getValue() == null ?null:en.getValue().toString());
+                clientSettings.add(setting);
+            });
+        });
+        clientDto.setClientSettings(clientSettings);
+
+        //认证方式
+        List<OAuth2ClientAuthenticationMethod> clientAuthenticationMethods = Lists.newArrayList();
+        Optional.ofNullable(registeredClient.getClientAuthenticationMethods()).ifPresent(methods ->{
+            methods.forEach(method ->{
+                OAuth2ClientAuthenticationMethod m = new OAuth2ClientAuthenticationMethod();
+                m.setClientId(registeredClient.getClientId());
+                m.setMethod(method.getValue());
+                clientAuthenticationMethods.add(m);
+            });
+        });
+        clientDto.setClientAuthenticationMethods(clientAuthenticationMethods);
+
+        List<OAuth2ClientAuthorizationGrantType> clientAuthorizationGrantTypes = Lists.newArrayList();
+        Optional.ofNullable(registeredClient.getAuthorizationGrantTypes()).ifPresent(grantTypes ->{
+            grantTypes.forEach(g ->{
+                OAuth2ClientAuthorizationGrantType type = new OAuth2ClientAuthorizationGrantType();
+                type.setClientId(registeredClient.getClientId());
+                type.setGrantType(g.getValue());
+                clientAuthorizationGrantTypes.add(type);
+            });
+        });
+        clientDto.setClientAuthorizationGrantTypes(clientAuthorizationGrantTypes);;
+
+        List<OAuth2ClientAuthorizationScope> clientAuthorizationScopes = Lists.newArrayList();
+        Optional.ofNullable(registeredClient.getScopes()).ifPresent(scopes ->{
+            scopes.forEach(scope ->{
+                OAuth2ClientAuthorizationScope s = new OAuth2ClientAuthorizationScope();
+                s.setClientId(registeredClient.getClientId());
+                s.setScope(scope);
+                clientAuthorizationScopes.add(s);
+            });
+        });
+        clientDto.setClientAuthorizationScopes(clientAuthorizationScopes);
+
+        List<OAuth2ClientRedirectUri> clientRedirectUris = Lists.newArrayList();
+        Optional.ofNullable(registeredClient.getRedirectUris()).ifPresent(uris ->{
+            uris.forEach(uri ->{
+                OAuth2ClientRedirectUri record = new OAuth2ClientRedirectUri();
+                record.setClientId(registeredClient.getClientId());
+                record.setRedirectUri(uri);
+                clientRedirectUris.add(record);
+            });
+        });
+        clientDto.setClientRedirectUris(clientRedirectUris);;
+        return clientDto;
     }
 
     private RegisteredClient convert(OAuth2ClientDto clientDto){
@@ -116,6 +207,7 @@ public class RemoteRegisteredClientRepository implements RegisteredClientReposit
         typeHandlerRegistry.regist(ConfigurationSettingNames.Token.ACCESS_TOKEN_TIME_TO_LIVE,durationTypeHandler);
         typeHandlerRegistry.regist(ConfigurationSettingNames.Token.REFRESH_TOKEN_TIME_TO_LIVE,durationTypeHandler);
         typeHandlerRegistry.regist(ConfigurationSettingNames.Token.ID_TOKEN_SIGNATURE_ALGORITHM,signatureAlgorithmTypeHandler);
+        typeHandlerRegistry.regist(Token.ACCESS_TOKEN_FORMAT,new OAuth2TokenFormatTypeHandler());
 
         typeHandlerRegistry.regist(ConfigurationSettingNames.Client.REQUIRE_PROOF_KEY,booleanTypeHandler);
         typeHandlerRegistry.regist(ConfigurationSettingNames.Client.REQUIRE_AUTHORIZATION_CONSENT,booleanTypeHandler);
@@ -124,6 +216,12 @@ public class RemoteRegisteredClientRepository implements RegisteredClientReposit
 
     @FunctionalInterface
     private interface TypeHandler{
+        /**
+         * 处理类型转换
+         * @param key
+         * @param value
+         * @return
+         */
         Object handle(String key,String value);
     }
 
@@ -157,6 +255,16 @@ public class RemoteRegisteredClientRepository implements RegisteredClientReposit
                 return temp;
             }
             return SignatureAlgorithm.from(value);
+        }
+    }
+
+    private class OAuth2TokenFormatTypeHandler implements  TypeHandler{
+        @Override
+        public Object handle(String key, String value) {
+            if(!Strings.isNullOrEmpty(value)){
+                return new OAuth2TokenFormat(value);
+            }
+            return null;
         }
     }
 
