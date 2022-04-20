@@ -5,24 +5,27 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import example.authentication.AuthUser;
 import example.authentication.OAuth2PasswordCredentialsAuthenticationConverter;
 import example.authentication.OAuth2PasswordCredentialsAuthenticationProvider;
-import example.authentication.federated.FederatedIdentityIdTokenCustomizer;
+import example.authentication.federated.FederatedIdentityConfigurer;
 import example.jose.Jwks;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenCustomizer;
@@ -35,9 +38,10 @@ import org.springframework.security.oauth2.server.authorization.web.authenticati
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import javax.xml.ws.WebEndpoint;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Joe Grandja
@@ -58,7 +62,7 @@ public class AuthorizationServerConfig {
                         new OAuth2ClientCredentialsAuthenticationConverter(),
                         new OAuth2PasswordCredentialsAuthenticationConverter()))
         )));
-//        http.apply(new FederatedIdentityConfigurer());
+        http.apply(new FederatedIdentityConfigurer());
         authorizationServerConfigurer.authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI));
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
         http
@@ -124,8 +128,23 @@ public class AuthorizationServerConfig {
         return daoAuthenticationProvider;
     }
 
+
+    /**
+     * This is a bit a hack, but as we do not know how we integrate the HealthPlattform this is a very easy way to solve the Problem for the moment.
+     */
     @Bean
-    public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer(){
-        return new FederatedIdentityIdTokenCustomizer();
+    public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
+        return context -> {
+            Authentication principal = context.getPrincipal();
+            if (Objects.equals(context.getTokenType(), OAuth2TokenType.ACCESS_TOKEN) && principal instanceof UsernamePasswordAuthenticationToken) {
+                Optional.ofNullable(principal.getPrincipal()).ifPresent(p ->{
+                    if(p instanceof AuthUser){
+                        AuthUser user = (AuthUser)p;
+                        context.getClaims()
+                                .claim("user_id", String.valueOf(user.getUserId()));
+                    }
+                });
+            }
+        };
     }
 }

@@ -17,6 +17,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class DefaultSecurityConfig {
 
+    // @formatter:off
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         FederatedIdentityConfigurer federatedIdentityConfigurer = new FederatedIdentityConfigurer()
@@ -31,4 +32,5 @@ public class DefaultSecurityConfig {
                 .apply(federatedIdentityConfigurer);
         return http.build();
     }
+    // @formatter:on
 }

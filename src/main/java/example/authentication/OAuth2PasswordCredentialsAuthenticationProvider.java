@@ -113,7 +113,7 @@ public class OAuth2PasswordCredentialsAuthenticationProvider implements Authenti
         // @formatter:off
         OAuth2TokenContext tokenContext = DefaultOAuth2TokenContext.builder()
                 .registeredClient(registeredClient)
-                .principal(new UsernamePasswordAuthenticationToken(username,password))
+                .principal(new UsernamePasswordAuthenticationToken(user,password))
                 .providerContext(ProviderContextHolder.getProviderContext())
                 .authorizedScopes(authorizedScopes)
                 .tokenType(OAuth2TokenType.ACCESS_TOKEN)
